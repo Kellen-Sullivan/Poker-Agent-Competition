@@ -1,73 +1,54 @@
-import numpy as np 
+from agent import RandomAgent, AlwaysFoldAgent
 from texas_holdem_env import TexasHoldEm
 
 
-class RandomAgent:
-    def act(self, observation, env):
-        """Returns a random index where the mask is 1"""
-        action_mask = observation["action_mask"]
-        valid_actions = np.flatnonzero(action_mask)     
-        return np.random.choice(valid_actions)
-    
-
-class AlwaysFoldAgent:
-    def act(self, observation, env: TexasHoldEm):
-        """
-        In PettingZoo Texas Hold'em
-        action mask: [Call, Raise, Fold, Check]
-        """
-        action_mask = observation["action_mask"]
-        valid_actions = np.flatnonzero(action_mask)  
-        # Always try to Fold if it's legal.
-        # If not, pick the first available legal action   
-        if env.FOLD in valid_actions:
-            return env.FOLD
-        return valid_actions[0]
-    
-
-def main():
+def run_competition(num_hands: int, agent_a, agent_b):
     env = TexasHoldEm(num_players=2, render_mode="ansi")
-    env.reset(seed=42)
+    env.reset()
 
     # define policies for each agent
-    # Petting Zoo uses the "player_idx" to determine each agent
-    policies = {
-        "player_0": RandomAgent(),
-        "player_1": RandomAgent()
-    }
+    Agent_A = agent_a
+    Agent_B = agent_b
 
     # number of hands to simulate to track cumulative reward
-    num_hands = 10000
+    num_hands = num_hands
 
     # number of chips each agent cumulatively won 
-    total_chips = {"player_0": 0.0, "player_1": 0.0}
-    wins = {"player_0": 0.0, "player_1": 0.0}
+    total_rewards = {"Agent_A": 0.0, "Agent_B": 0.0}
+    wins = {"Agent_A": 0.0, "Agent_B": 0.0}
 
     for i in range(num_hands):
-        env.reset(seed=42)
+        env.reset()
 
-        # track rewards for this specific hand
-        hand_rewards = {"player_0": 0.0, "player_1": 0.0}
+        # Swap who starts betting for each new hand
+        if i % 2 == 0:
+            seat_map = {"player_0": Agent_A, "player_1": Agent_B}
+            agent_identity = {"player_0": "Agent_A", "player_1": "Agent_B"}
+        else:
+            seat_map = {"player_0": Agent_B, "player_1": Agent_A}
+            agent_identity = {"player_0": "Agent_B", "player_1": "Agent_A"}
 
+        # Track chips won in each hand
+        hand_rewards = {"Agent_A": 0.0, "Agent_B": 0.0}
+
+        # Simulate one hand until a plyer wins
         for agent in env.agent_iter:
             observation, reward, termination, truncation, info = env.last()
 
-            # Add rewards to current hand rewards
-            hand_rewards[agent] += reward
+            actual_agent_name = agent_identity[agent]
+            hand_rewards[actual_agent_name] += reward
 
             if termination or truncation:
                 action = None
             else:
-                policy = policies[agent]
-
+                policy = seat_map[agent]
                 action = policy.act(observation, env)
-                #print(f"Agent {agent} chose to {env.ACTION_NAMES[action]}")
             
             env.step(action)
 
-        # Update hand totals after hand ends
+        # Update win totals and reward totals after hand ends
         for agent, reward in hand_rewards.items():
-            total_chips[agent] += hand_rewards[agent]
+            total_rewards[agent] += hand_rewards[agent]
             if reward > 0:
                 wins[agent] += 1
 
@@ -80,10 +61,15 @@ def main():
     # Show the results
     print("\n=== Final Results ===")
     print(f"Total Hands: {num_hands}")
-    for agent in total_chips:
-        avg_chips = total_chips[agent] / num_hands
+    for agent in total_rewards:
+        avg_chips = total_rewards[agent] / num_hands
         win_rate = (wins[agent] / num_hands) * 100
-        print(f"{agent}: {total_chips[agent]:.1f} Total Chips | {avg_chips:.2f} Chips/Hand | Win Rate: {win_rate:.1f}%")
+        print(f"{agent}: {total_rewards[agent]:.1f} Total Chips | {avg_chips:.2f} Chips/Hand | Win Rate: {win_rate:.1f}%")
+
+
+def main():
+    run_competition(10000, RandomAgent(), RandomAgent())
+    
 
 if __name__ == "__main__":
     main()
