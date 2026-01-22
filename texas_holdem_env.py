@@ -8,6 +8,10 @@ option for rendering and add human readable observation option to the state repr
 
 TODO: update observation and/or info to be more human readable and 
 easy to understand for others
+
+TODO: Figure out the best way to do readable constants
+
+TODO: Make ansi version work
 """
     
 class TexasHoldEm():
@@ -17,9 +21,16 @@ class TexasHoldEm():
     # Define readable constants following RLCard's implementation
     FOLD = 0
     CHECK_CALL = 1
-    RAISEHALFPOT = 2
-    RAISEFULLPOT = 3
-    ALLIN = 4
+    RAISE_HALF_POT = 2
+    RAISE_FULL_POT = 3
+    ALL_IN = 4
+
+    PREFLOP = 0
+    FLOP = 1
+    TURN = 2
+    RIVER = 3
+    END_HIDDEN = 4
+    SHOWDOWN = 5
 
     # ACTION_NAMES = {FOLD: "Fold", CHECK_CALL: "Check or Call", RAISEHALFPOT: "Raise Half Pot", RAISEFULLPOT: "Raise Full Pot", ALLIN: "All In"}
 
@@ -50,22 +61,34 @@ class TexasHoldEm():
         # Access player state
         env = self.env.unwrapped.env
         game = env.game
-        state = game.get_state(game.get_player_id())
+        current_player_id = game.get_player_id()
+        opponent_player_id = (current_player_id + 1) % 2
+        state = game.get_state(current_player_id)
 
-        observation["human_readable"] = state
-        """
-        'human_readable': {
-            'hand': ['H8', 'SJ'], 
-            'public_cards': [], 
-            'all_chips': [2, 1], 
-            'my_chips': 2, 
-            'legal_actions': [<Action.FOLD: 0>, <Action.CHECK_CALL: 1>, <Action.RAISE_HALF_POT: 2>, <Action.RAISE_POT: 3>, <Action.ALL_IN: 4>], 
-            'stakes': [98, 99], 
-            'current_player': 0, 
-            'pot': np.int64(3), 
-            'stage': <Stage.PREFLOP: 0>}
+        human_readable_dict = {
+            # Context
+            'current_player': state['current_player'],
+            'round': state['stage'],
+            'pot': int(state['pot']),
+
+            # Cards
+            'hand': state['hand'], 
+            'community_cards': state['public_cards'], 
+
+            # Stacks
+            'stacks': state['stakes'],
+            'my_stack': state['stakes'][current_player_id],
+            'opponent_stack': state['stakes'][opponent_player_id],
+
+            # Round bets
+            'round_bets': state['all_chips'], 
+            'amount_to_call': max(0, state['all_chips'][opponent_player_id] - state['all_chips'][current_player_id]),
+
+            # Actions
+            'legal_actions': state['legal_actions'],             
         }
-        """
+        
+        observation["human_readable"] = human_readable_dict
         
         return observation, reward, termination, truncation, info
     

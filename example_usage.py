@@ -1,4 +1,4 @@
-from agent import RandomAgent, AlwaysFoldAgent
+from agent import RandomAgent, AlwaysFoldAgent, HeuristicAgent
 from texas_holdem_env import TexasHoldEm
 
 
@@ -90,8 +90,8 @@ def run_hand(agent_a, agent_b):
 
 
 def main():
-    run_hand(RandomAgent(), RandomAgent())
-    #run_competition(10000, RandomAgent(), AlwaysFoldAgent())
+    #run_hand(AlwaysFoldAgent(), RandomAgent())
+    run_competition(10000, HeuristicAgent(), RandomAgent())
     
 
 if __name__ == "__main__":
