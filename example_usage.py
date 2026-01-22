@@ -67,8 +67,31 @@ def run_competition(num_hands: int, agent_a, agent_b):
         print(f"{agent}: {total_rewards[agent]:.1f} Total Chips | {avg_chips:.2f} Chips/Hand | Win Rate: {win_rate:.1f}%")
 
 
+def run_hand(agent_a, agent_b):
+    env = TexasHoldEm(num_players=2, render_mode="ansi")
+    env.reset()
+
+    # define policies for each agent
+    policies = {"player_0": agent_a, "player_1": agent_b}
+
+    # Simulate one hand until a plyer wins
+    for agent in env.agent_iter:
+        observation, reward, termination, truncation, info = env.last()
+        print(observation)
+
+        if termination or truncation:
+            action = None
+        else:
+            policy = policies[agent]
+            action = policy.act(observation, env)
+        
+        env.step(action)
+    env.close()
+
+
 def main():
-    run_competition(10000, RandomAgent(), RandomAgent())
+    run_hand(RandomAgent(), RandomAgent())
+    #run_competition(10000, RandomAgent(), AlwaysFoldAgent())
     
 
 if __name__ == "__main__":

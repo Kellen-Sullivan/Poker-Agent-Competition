@@ -3,8 +3,8 @@ import numpy as np
 
 
 """
-Wrap the texas_holdem_v4 environment to include an ansi
-option for rendering and make ___ changes to the state representation?
+Wrap the texas_holdem_no_limit_v6 environment to include an ansi
+option for rendering and add human readable observation option to the state representation
 
 TODO: update observation and/or info to be more human readable and 
 easy to understand for others
@@ -12,18 +12,16 @@ easy to understand for others
     
 class TexasHoldEm():
     """
-    Wrapper of texas_holdem_v4 which is a wrapper of RLCardGame
-    Structure: AECEnv -> texas_holdem_v4 -> RLCardGame
+    Wrapper of texas_holdem_no_limit_v6 which is a wrapper of RLCardGame
     """
     # Define readable constants following RLCard's implementation
     FOLD = 0
-    CHECK = 1
-    CALL = 2
-    RAISEHALFPOT = 3
-    RAISEPOT = 4
-    ALLIN = 5
+    CHECK_CALL = 1
+    RAISEHALFPOT = 2
+    RAISEFULLPOT = 3
+    ALLIN = 4
 
-    ACTION_NAMES = {FOLD: "Fold", CHECK: "Check", CALL: "Call", RAISEHALFPOT: "Raise Half Pot", RAISEPOT: "Raise Pot", ALLIN: "All In"}
+    # ACTION_NAMES = {FOLD: "Fold", CHECK_CALL: "Check or Call", RAISEHALFPOT: "Raise Half Pot", RAISEFULLPOT: "Raise Full Pot", ALLIN: "All In"}
 
     def __init__(self, num_players=2, render_mode="ansi"):
         self.env = texas_holdem_no_limit_v6.env(num_players=num_players, render_mode=render_mode)
@@ -54,7 +52,20 @@ class TexasHoldEm():
         game = env.game
         state = game.get_state(game.get_player_id())
 
-        info["hand_cards"] = state["hand"]
+        observation["human_readable"] = state
+        """
+        'human_readable': {
+            'hand': ['H8', 'SJ'], 
+            'public_cards': [], 
+            'all_chips': [2, 1], 
+            'my_chips': 2, 
+            'legal_actions': [<Action.FOLD: 0>, <Action.CHECK_CALL: 1>, <Action.RAISE_HALF_POT: 2>, <Action.RAISE_POT: 3>, <Action.ALL_IN: 4>], 
+            'stakes': [98, 99], 
+            'current_player': 0, 
+            'pot': np.int64(3), 
+            'stage': <Stage.PREFLOP: 0>}
+        }
+        """
         
         return observation, reward, termination, truncation, info
     

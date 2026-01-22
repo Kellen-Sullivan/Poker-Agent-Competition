@@ -6,7 +6,7 @@ class RandomAgent:
     def act(self, observation, env):
         """Returns a random index where the mask is 1"""
         action_mask = observation["action_mask"]
-        valid_actions = np.flatnonzero(action_mask)     
+        valid_actions = np.flatnonzero(action_mask)
         return np.random.choice(valid_actions)
     
 
@@ -22,4 +22,13 @@ class AlwaysFoldAgent:
         # If not, pick the first available legal action   
         if env.FOLD in valid_actions:
             return env.FOLD
+        return valid_actions[0]
+    
+# TODO: Update this agent to work with heuristics
+class HeuristicAgent:
+    def act(self, observation, env: TexasHoldEm):
+        """Act based on a set of good heuristics. 
+        Use human-readable observation"""
+        action_mask = observation["action_mask"]
+        valid_actions = np.flatnonzero(action_mask)
         return valid_actions[0]
