@@ -14,7 +14,7 @@ class AlwaysFoldAgent:
     def act(self, observation, env: TexasHoldEm):
         """
         In PettingZoo Texas Hold'em
-        action mask: [Call, Raise, Fold, Check]
+        action mask: [Fold, Check, Call, Raise Half Pot, Raise Full Pot, All In]
         """
         action_mask = observation["action_mask"]
         valid_actions = np.flatnonzero(action_mask)  

@@ -1,4 +1,4 @@
-from pettingzoo.classic import texas_holdem_v4
+from pettingzoo.classic import texas_holdem_no_limit_v6
 import numpy as np
 
 
@@ -16,15 +16,17 @@ class TexasHoldEm():
     Structure: AECEnv -> texas_holdem_v4 -> RLCardGame
     """
     # Define readable constants following RLCard's implementation
-    CALL = 0
-    RAISE = 1
-    FOLD = 2
-    CHECK = 3
+    FOLD = 0
+    CHECK = 1
+    CALL = 2
+    RAISEHALFPOT = 3
+    RAISEPOT = 4
+    ALLIN = 5
 
-    ACTION_NAMES = {CALL: "Call", RAISE: "Raise", FOLD: "Fold", CHECK: "Check"}
+    ACTION_NAMES = {FOLD: "Fold", CHECK: "Check", CALL: "Call", RAISEHALFPOT: "Raise Half Pot", RAISEPOT: "Raise Pot", ALLIN: "All In"}
 
     def __init__(self, num_players=2, render_mode="ansi"):
-        self.env = texas_holdem_v4.env(num_players=num_players, render_mode=render_mode)
+        self.env = texas_holdem_no_limit_v6.env(num_players=num_players, render_mode=render_mode)
         self.env.reset()
 
     def reset(self, **kwargs):

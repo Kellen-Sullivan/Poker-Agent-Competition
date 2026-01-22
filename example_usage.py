@@ -52,7 +52,7 @@ def run_competition(num_hands: int, agent_a, agent_b):
             if reward > 0:
                 wins[agent] += 1
 
-        # Progress bar
+        # Progress tracker
         if (i + 1) % 100 == 0:
             print(f"Hand {i+1}/{num_hands} complete.")
 
