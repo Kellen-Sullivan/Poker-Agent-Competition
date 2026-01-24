@@ -68,7 +68,7 @@ class TexasHoldEm():
         human_readable_dict = {
             # Context
             'current_player': state['current_player'],
-            'round': state['stage'],
+            'round': state['stage'].value,
             'pot': int(state['pot']),
 
             # Cards

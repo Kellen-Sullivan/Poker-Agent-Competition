@@ -1,4 +1,5 @@
 import numpy as np 
+from poker_eval import HandEvaluator, HandRank
 from texas_holdem_env import TexasHoldEm
 
 
@@ -24,57 +25,56 @@ class AlwaysFoldAgent:
             return env.FOLD
         return valid_actions[0]
     
-# THIS AGENT LITERALLY LOSES TO A RANDOM AGENT (FOLDS TOO MUCH)
 class HeuristicAgent:
     def act(self, observation, env: TexasHoldEm):
         """Act based on a set of good heuristics. 
         Use human-readable observation"""
         action_mask = observation["action_mask"]
-        valid_actions = np.flatnonzero(action_mask)
-
         state = observation["human_readable"]
-        
-        # Parse hand strength
-        # Card format is (Suit, Rank)
-        def get_rank_value(card_string):
-            rank_map = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, 
-                        '8': 8, '9': 9, 'T': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14}
-            return rank_map.get(card_string[1], 0)
+        valid_actions = np.flatnonzero(action_mask)  
 
-        my_ranks = [get_rank_value(c) for c in state['hand']]
-        board_ranks = [get_rank_value(c) for c in state['community_cards']]
-        
-        # === Calculate Heuristic score for current state ===
-        score = 0
-        
-        # Pre-flop Rule
+        # === Preflop Strategy ===
         if state['round'] == env.PREFLOP:
-            if 14 in my_ranks: score += 5  # Ace is good
-            if 13 in my_ranks: score += 3  # King is decent
-            if my_ranks[0] == my_ranks[1]: score += 10 # Pocket pair!
+            # Simple heuristic: If we have a pair, or High cards (Sum > 20), play aggressive
+            hand = state['hand']
+            rank1 = HandEvaluator.RANK_MAP[hand[0][1]]
+            rank2 = HandEvaluator.RANK_MAP[hand[1][1]]
             
-        # Post-flop Rule
-        # Check if any of my cards match the board
-        hits = [r for r in my_ranks if r in board_ranks]
-        if len(hits) > 0:
-            score += 15 # We hit a pair or better!
+            is_pair = rank1 == rank2
+            is_high = (rank1 + rank2) > 20 # e.g. K(13) + 8(8) = 21
             
-        # === Decide action based on calculate Heuristic score ===
-        action_mask = observation["action_mask"]
+            if (is_pair or is_high) and env.RAISE_HALF_POT in valid_actions:
+                return env.RAISE_HALF_POT
+                
+            # Otherwise try to Check, and fold/all-in as last result
+            if env.CHECK_CALL in valid_actions:
+                return env.CHECK_CALL
+            return valid_actions[0] # forced to fold/all-in
         
-        # If score is high try to Raise
-        if score > 10:
-            if action_mask[env.RAISE_FULL_POT]: return env.RAISE_FULL_POT
-            if action_mask[env.RAISE_HALF_POT]: return env.RAISE_HALF_POT
+        # === Postflop Strategy ===
+        cards = state["hand"] + state["community_cards"]
+        
+        # Calculate Hand Strength
+        hand_rank, tiebreaker = HandEvaluator.evaluate_hand(cards)
+
+        # Go all in with Full House or better
+        if hand_rank >= HandRank.FULL_HOUSE:
+            if env.ALL_IN in valid_actions: return env.ALL_IN
+            if env.RAISE_FULL_POT in valid_actions: return env.RAISE_FULL_POT
+
+        # Raise a Strong hand
+        if hand_rank >= HandRank.TWO_PAIR:
+            if env.RAISE_FULL_POT in valid_actions: return env.RAISE_FULL_POT
+            if env.RAISE_HALF_POT in valid_actions: return env.RAISE_HALF_POT
             
-        # If score is mediocre just Call
-        if score > 0:
-            if action_mask[env.CHECK_CALL]: return env.CHECK_CALL
+        # Small raise with at least a pair
+        if hand_rank >= HandRank.PAIR:
+            if env.RAISE_HALF_POT in valid_actions: return env.RAISE_HALF_POT
             
-        # Never fold if we can check for free
-        if state['amount_to_call'] == 0:
+        # If nothing, try to check
+        if env.CHECK_CALL in valid_actions:
             return env.CHECK_CALL
-            
-        # Otherwise fold
-        return env.FOLD
+
+        # Never always fold, randomly play valid action to maybe bluff
+        return np.random.choice(valid_actions)
         
