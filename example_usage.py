@@ -59,12 +59,13 @@ def run_competition(num_hands: int, agent_a, agent_b):
         env.close()
 
     # Show the results
+    BIG_BLIND_SIZE = 2
     print("\n=== Final Results ===")
     print(f"Total Hands: {num_hands}")
     for agent in total_rewards:
-        avg_chips = total_rewards[agent] / num_hands
+        avg_bb_per_hand = total_rewards[agent] / (num_hands * BIG_BLIND_SIZE)
         win_rate = (wins[agent] / num_hands) * 100
-        print(f"{agent}: {total_rewards[agent]:.1f} Total Chips | {avg_chips:.2f} Chips/Hand | Win Rate: {win_rate:.1f}%")
+        print(f"{agent}: {total_rewards[agent]:.1f} Total Chips | {(avg_bb_per_hand * 100):.2f} bb/100 Hands | Win Rate: {win_rate:.1f}%")
 
 
 def run_hand(agent_a, agent_b):
@@ -90,8 +91,8 @@ def run_hand(agent_a, agent_b):
 
 
 def main():
-    #run_hand(AlwaysFoldAgent(), RandomAgent())
-    run_competition(10000, HeuristicAgent(), RandomAgent())
+    #run_hand(RandomAgent(), RandomAgent())
+    run_competition(10000, HeuristicAgent(), AlwaysFoldAgent())
     
 
 if __name__ == "__main__":

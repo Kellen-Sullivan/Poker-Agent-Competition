@@ -36,6 +36,16 @@ class TexasHoldEm():
 
     def __init__(self, num_players=2, render_mode="ansi"):
         self.env = texas_holdem_no_limit_v6.env(num_players=num_players, render_mode=render_mode)
+
+        # set starting stacks to 200 (100 is default)
+        rlcard_env = self.env.unwrapped.env
+        config = {
+            'game_num_players': num_players,
+            'chips_for_each': 200,
+            'dealer_id': 0
+        }
+        rlcard_env.game.configure(config)
+
         self.env.reset()
 
     def reset(self, **kwargs):
