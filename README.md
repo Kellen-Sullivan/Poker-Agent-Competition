@@ -4,7 +4,8 @@
 This environment wraps Petting Zoo's Texas Hold'em No Limit poker: 
 https://pettingzoo.farama.org/environments/classic/texas_holdem_no_limit/
 
-Petting Zoo's implementation is based off of RLCard's no limit texas hold em: 
+Petting Zoo's implementation is based off of RLCard's no limit texas hold em:
+
 https://rlcard.org/games.html#no-limit-texas-hold-em
 
 ## Creating and Testing and Agent
