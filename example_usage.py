@@ -1,4 +1,4 @@
-from agent import RandomAgent, AlwaysFoldAgent, HeuristicAgent
+from example_agents import RandomAgent, AlwaysFoldAgent, HeuristicAgent
 from texas_holdem_env import TexasHoldEm
 
 
@@ -75,24 +75,43 @@ def run_hand(agent_a, agent_b):
     # define policies for each agent
     policies = {"player_0": agent_a, "player_1": agent_b}
 
+    # Helpful labels for the terminal output
+    agent_labels = {
+        "player_0": f"player_0 ({type(agent_a).__name__})",
+        "player_1": f"player_1 ({type(agent_b).__name__})",
+    }
+
     # Simulate one hand until a plyer wins
+    step_idx = 0
     for agent in env.agent_iter:
         observation, reward, termination, truncation, info = env.last()
-        print(observation)
+
+        print("\n" + "=" * 80)
+        print(f"Step {step_idx} - To act: {agent_labels[agent]}")
+        print(env.render())
 
         if termination or truncation:
             action = None
+            print(f"Game is terminal. No action taken.")
         else:
             policy = policies[agent]
             action = policy.act(observation, env)
+
+            action_str = TexasHoldEm.action_to_string(action)
+            print(f"Action taken by {agent_labels[agent]}: {action_str}")
+
+        step_idx += 1
         
         env.step(action)
+
+    print("\n" + "=" * 80)
+    print("Hand complete.\n")
     env.close()
 
 
 def main():
-    #run_hand(RandomAgent(), RandomAgent())
-    run_competition(10000, HeuristicAgent(), AlwaysFoldAgent())
+    run_hand(RandomAgent(), RandomAgent())
+    #run_competition(10000, HeuristicAgent(), AlwaysFoldAgent())
     
 
 if __name__ == "__main__":
