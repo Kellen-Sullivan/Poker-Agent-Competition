@@ -12,8 +12,7 @@ class RandomAgent:
         action_mask = observation["action_mask"]
         valid_actions = np.flatnonzero(action_mask)  # For example turns: [1, 0, 1, 1, 0] -> [0, 2, 3]
 
-        action = Action(np.random.choice(valid_actions))
-        return action
+        return np.random.choice(valid_actions) # return a random valid action
     
 
 class AlwaysFoldAgent:
@@ -28,7 +27,7 @@ class AlwaysFoldAgent:
         # If not, pick the first available legal action   
         if Action.FOLD in valid_actions:
             return Action.FOLD
-        return Action(valid_actions[0])
+        return valid_actions[0]
     
 class HeuristicAgent:
     def act(self, observation, env: TexasHoldEm):
@@ -81,5 +80,5 @@ class HeuristicAgent:
             return Action.CHECK_CALL
 
         # Never always fold, randomly play valid action to maybe bluff
-        return Action(np.random.choice(valid_actions))
+        return np.random.choice(valid_actions)
         
