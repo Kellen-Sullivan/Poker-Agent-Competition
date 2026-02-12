@@ -1,11 +1,11 @@
 from pettingzoo.classic import texas_holdem_no_limit_v6
-from poker_eval import HandEvaluator, HandRank
+from examples.poker_eval import HandEvaluator, HandRank
 import numpy as np
 from enum import IntEnum
 
 
 class Action(IntEnum):
-    """Canonical action enum for all agents and renderers.
+    """Action enum for all agents and renderers.
 
     These values match the underlying PettingZoo action indices.
     """

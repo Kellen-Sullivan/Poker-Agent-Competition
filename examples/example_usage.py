@@ -1,4 +1,4 @@
-from example_agents import RandomAgent, AlwaysFoldAgent, HeuristicAgent
+from examples.example_agents import RandomAgent, AlwaysFoldAgent, HeuristicAgent
 from texas_holdem_env import TexasHoldEm
 
 

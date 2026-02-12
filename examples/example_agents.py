@@ -1,5 +1,5 @@
 import numpy as np 
-from poker_eval import HandEvaluator, HandRank
+from examples.poker_eval import HandEvaluator, HandRank
 from texas_holdem_env import TexasHoldEm, Action, Round
 
 
