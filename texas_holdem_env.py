@@ -1,4 +1,5 @@
 from pettingzoo.classic import texas_holdem_no_limit_v6
+from poker_eval import HandEvaluator, HandRank
 import numpy as np
 from enum import IntEnum
 
@@ -118,7 +119,31 @@ class TexasHoldEm():
         }
         
         observation["human_readable"] = human_readable_dict
-        
+
+        # =====================================================
+        #              CUSTOM VARIANT IMPLEMENTATION
+        # Give player a reward bonus for winning with a bad hand
+        # TODO: FIGURE OUT WHAT COUNTS AS A BAD HAND
+        # =====================================================
+
+        if termination and reward > 0:
+
+            cards = state['hand'] + state['public_cards']
+            hand_rank, tiebreaker = HandEvaluator.evaluate_hand(cards)
+
+            # Give reward bonus for winning with a bad hand and after the preflop
+            if hand_rank < HandRank.PAIR and state['stage'].value > Round.PREFLOP:
+                reward *= 2
+
+        elif termination and reward < 0:
+            winning_opponent_state = game.get_state(opponent_player_id)
+            winning_opponent_cards = winning_opponent_state['hand'] + winning_opponent_state['public_cards']
+            winning_opponent_hand_rank, winning_opponent_tiebreaker = HandEvaluator.evaluate_hand(winning_opponent_cards)
+
+            # Double negative reward for losing to a bad hand after the preflop
+            if winning_opponent_hand_rank < HandRank.PAIR and winning_opponent_state['stage'].value > Round.PREFLOP:
+                reward *= 2
+
         return observation, reward, termination, truncation, info
     
     def ansi_render(self):

@@ -110,8 +110,8 @@ def run_hand(agent_a, agent_b):
 
 
 def main():
-    run_hand(RandomAgent(), RandomAgent())
-    #run_competition(10000, HeuristicAgent(), AlwaysFoldAgent())
+    #run_hand(RandomAgent(), RandomAgent())
+    run_competition(10000, HeuristicAgent(), RandomAgent())
     
 
 if __name__ == "__main__":
