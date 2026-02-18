@@ -66,8 +66,14 @@ class TexasHoldEm():
         rlcard_env.game.configure(config)
 
         self.env.reset()
+        # Multiplier applied to terminal rewards for the current hand.
+        # This is computed once per hand (on first terminal step) so that
+        # both players' rewards are scaled identically, preserving zero‑sum.
+        self._terminal_multiplier = 1.0
 
     def reset(self, **kwargs):
+        # Reset underlying env and per‑hand reward shaping state
+        self._terminal_multiplier = 1.0
         return self.env.reset(**kwargs)
     
     def step(self, action):
@@ -90,7 +96,11 @@ class TexasHoldEm():
         # Access player state
         env = self.env.unwrapped.env
         game = env.game
-        current_player_id = game.get_player_id()
+        # In PettingZoo's AEC API, the "current" agent is given by
+        # env.agent_selection (e.g., "player_0", "player_1").  We use this
+        # to pick the correct seat index and then query RLCard for state.
+        agent_name = self.env.agent_selection  # "player_0" / "player_1"
+        current_player_id = int(agent_name.split("_")[1])
         opponent_player_id = (current_player_id + 1) % 2
         state = game.get_state(current_player_id)
 
@@ -124,21 +134,40 @@ class TexasHoldEm():
         observation["human_readable"] = human_readable_dict
 
         # =====================================================
-        # CUSTOM VARIANT: Weak Hand Multiplier 
-        # Bonus 2x reward when winning with weak hole cards (e.g., 7-2, J-4 offsuit)
+        # CUSTOM VARIANT: Weak Hand Multiplier
+        # Bonus 2x reward when winning with weak hole cards (e.g., 7‑2, J‑4 offsuit)
+        #
+        # To preserve the underlying game's zero‑sum property, we:
+        #   1) Compute a single per‑hand multiplier based on the *winner's*
+        #      hole cards (2x if weak, 1x otherwise) on the first terminal step.
+        #   2) Apply that same multiplier to every player's terminal reward.
+        #
+        # Because the base environment is zero‑sum (r0 + r1 = 0), scaling both
+        # sides by the same factor keeps the sum at zero.
         # =====================================================
 
-        if termination and reward > 0:
-            my_hole_cards = state['hand']
+        base_reward = reward
 
-            if is_weak_hand(my_hole_cards):
-                reward *= 2.0  # Incentive to win with weak hand
+        if termination:
+            # Only (re)compute the multiplier on the first terminal callback
+            # for a hand. Subsequent terminal steps for the other player will
+            # reuse the same value so that both rewards are scaled identically.
+            if self._terminal_multiplier == 1.0:
+                # Determine winner seat from the *base* reward sign.
+                if base_reward > 0:
+                    winner_id = current_player_id
+                elif base_reward < 0:
+                    winner_id = opponent_player_id
+                else:
+                    winner_id = None  # Split pot / no winner; no bonus applied.
 
-        elif termination and reward < 0:
-            opponent_hole_cards = game.get_state(opponent_player_id)['hand']
+                if winner_id is not None:
+                    winner_hole_cards = game.get_state(winner_id)['hand']
+                    if is_weak_hand(winner_hole_cards):
+                        self._terminal_multiplier = 2.0
 
-            if is_weak_hand(opponent_hole_cards):
-                reward *= 2.0  # Double negative reward for losing to weak hand
+            # Apply the (possibly updated) multiplier to this agent's reward.
+            reward = base_reward * self._terminal_multiplier
 
         return observation, reward, termination, truncation, info
     
