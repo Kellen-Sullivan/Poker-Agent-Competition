@@ -1,5 +1,5 @@
 from pettingzoo.classic import texas_holdem_no_limit_v6
-from examples.poker_eval import HandEvaluator, HandRank
+from examples.poker_eval import HandEvaluator, HandRank, is_weak_hand
 import numpy as np
 from enum import IntEnum
 
@@ -116,33 +116,29 @@ class TexasHoldEm():
                 state['all_chips'][opponent_player_id]
                 - state['all_chips'][current_player_id],
             ),
+
+            # Weak Hand variant: True if hole cards qualify for 2x bonus on win
+            'is_weak_hand': is_weak_hand(state['hand']),
         }
         
         observation["human_readable"] = human_readable_dict
 
         # =====================================================
-        #              CUSTOM VARIANT IMPLEMENTATION
-        # Give player a reward bonus for winning with a bad hand
-        # TODO: FIGURE OUT WHAT COUNTS AS A BAD HAND
+        # CUSTOM VARIANT: Weak Hand Multiplier 
+        # Bonus 2x reward when winning with weak hole cards (e.g., 7-2, J-4 offsuit)
         # =====================================================
 
         if termination and reward > 0:
+            my_hole_cards = state['hand']
 
-            cards = state['hand'] + state['public_cards']
-            hand_rank, tiebreaker = HandEvaluator.evaluate_hand(cards)
-
-            # Give reward bonus for winning with a bad hand and after the preflop
-            if hand_rank < HandRank.PAIR and state['stage'].value > Round.PREFLOP:
-                reward *= 2
+            if is_weak_hand(my_hole_cards):
+                reward *= 2.0  # Incentive to win with weak hand
 
         elif termination and reward < 0:
-            winning_opponent_state = game.get_state(opponent_player_id)
-            winning_opponent_cards = winning_opponent_state['hand'] + winning_opponent_state['public_cards']
-            winning_opponent_hand_rank, winning_opponent_tiebreaker = HandEvaluator.evaluate_hand(winning_opponent_cards)
+            opponent_hole_cards = game.get_state(opponent_player_id)['hand']
 
-            # Double negative reward for losing to a bad hand after the preflop
-            if winning_opponent_hand_rank < HandRank.PAIR and winning_opponent_state['stage'].value > Round.PREFLOP:
-                reward *= 2
+            if is_weak_hand(opponent_hole_cards):
+                reward *= 2.0  # Double negative reward for losing to weak hand
 
         return observation, reward, termination, truncation, info
     

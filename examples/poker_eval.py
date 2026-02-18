@@ -110,3 +110,29 @@ class HandEvaluator:
 
         # 9. High Card
         return HandRank.HIGH_CARD, ranks
+
+
+def is_weak_hand(hand_list):
+    """Return True if hole cards qualify as a trash/garbage hand for the bonus multiplier."""
+    # hand_list is like ['S7', 'D2'] (Suit/Rank)
+    ranks = sorted([c[1] for c in hand_list], reverse=True)
+    suits = [c[0] for c in hand_list]
+
+    # Map face cards to numbers for comparison
+    rank_map = {'A': 14, 'K': 13, 'Q': 12, 'J': 11, 'T': 10}
+
+    def rank_val(r):
+        return rank_map.get(r, int(r) if r.isdigit() else 0)
+
+    val1 = rank_val(ranks[0])
+    val2 = rank_val(ranks[1])
+
+    is_suited = suits[0] == suits[1]
+    is_connector = abs(val1 - val2) == 1
+
+    # Heuristic for "Bad Hand":
+    # Not a pair, not suited, high card < 10, not connected
+    if val1 != val2 and not is_suited and val1 < 10 and not is_connector:
+        return True
+
+    return False
