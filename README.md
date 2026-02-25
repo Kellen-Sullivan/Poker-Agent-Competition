@@ -1,19 +1,25 @@
-# Poker-Agent-Competition
+# Poker Agent Competition
 
-Look at instructions.ipynb to learn more about the competition and how to participate!
+OSU AI Club — Spring 2026
 
-## Project Structure
-
-```
-├── texas_holdem_env/     # Texas Hold'em environment (Action, Round, TexasHoldEm)
-├── examples/             # poker_eval, example_usage, example_agents
-├── workspace/            # Your code goes here
-│   ├── agent.py          # Implement your agent
-│   └── train.py          # Implement your training loop
-└── test_agent.py         # Run competitions and benchmark
-```
+See `instructions.ipynb` for full competition details.
 
 ## Quick Start
 
-1. Implement your agent in `workspace/agent.py` (must have `act(observation, env)` method).
-2. Run `python test_agent.py` from the project root to benchmark.
+```bash
+pip install -r requirements.txt
+```
+
+1. Edit `agent.py` — implement your strategy in `MyAgent.act()`. If you are implementing a deep reinforcement learning agent, you may want to create additional files. See `rl_example` for more details.
+2. Run `python test_agent.py` to benchmark against built-in opponents.
+
+## Files
+
+| File | Purpose |
+|---|---|
+| `agent.py` | **Your agent** — edit this |
+| `test_agent.py` | Run competitions and print results |
+| `poker_env.py` | Environment, hand evaluator, action/round enums |
+| `agents.py` | RandomAgent, HeuristicAgent (opponents) |
+| `rl_example/` | Optional deep RL reference (train, evaluate, deploy) |
+| `instructions.ipynb` | Full competition guide |
