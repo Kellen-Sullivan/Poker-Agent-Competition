@@ -6,7 +6,7 @@ Usage:
 """
 
 from poker_env import TexasHoldEm
-from agents import RandomAgent, HeuristicAgent
+from example_agents import RandomAgent, HeuristicAgent
 from agent import MyAgent
 
 

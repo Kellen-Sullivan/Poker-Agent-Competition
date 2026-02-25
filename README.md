@@ -20,6 +20,6 @@ pip install -r requirements.txt
 | `agent.py` | **Your agent** — edit this |
 | `test_agent.py` | Run competitions and print results |
 | `poker_env.py` | Environment, hand evaluator, action/round enums |
-| `agents.py` | RandomAgent, HeuristicAgent (opponents) |
+| `example_agents.py` | RandomAgent, HeuristicAgent (opponents) |
 | `rl_example/` | Optional deep RL reference (train, evaluate, deploy) |
 | `instructions.ipynb` | Full competition guide |

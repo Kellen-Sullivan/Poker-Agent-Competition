@@ -2,7 +2,7 @@
 Built-in opponent agents for benchmarking.
 
 Provides RandomAgent and HeuristicAgent, which can be used 
-totest against using test_agent.py.
+to test against using test_agent.py.
 """
 
 import numpy as np

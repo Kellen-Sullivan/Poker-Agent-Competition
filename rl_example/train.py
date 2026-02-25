@@ -22,7 +22,7 @@ from stable_baselines3.common.callbacks import BaseCallback
 
 from rl_example.gym_wrapper import PokerGymEnv
 from rl_example.feature_extractor import extract_features, FEATURE_DIM
-from agents import RandomAgent, HeuristicAgent
+from example_agents import RandomAgent, HeuristicAgent
 from poker_env import TexasHoldEm, Action
 
 
