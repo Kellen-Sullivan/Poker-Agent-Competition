@@ -1,8 +1,8 @@
 """
 Built-in opponent agents for benchmarking.
 
-Provides RandomAgent and HeuristicAgent, which students can test against
-using test_agent.py.
+Provides RandomAgent and HeuristicAgent, which can be used 
+totest against using test_agent.py.
 """
 
 import numpy as np
@@ -12,16 +12,16 @@ from poker_env import Action, Round, HandEvaluator, HandRank
 class RandomAgent:
     """Selects a random legal action each turn."""
 
-    def act(self, observation, env):
+    def act(self, observation):
         action_mask = observation["action_mask"]
         valid_actions = np.flatnonzero(action_mask)
         return np.random.choice(valid_actions)
 
 
 class HeuristicAgent:
-    """Rule-based agent that plays tighter pre-flop and value-bets post-flop."""
+    """Rule-based agent that plays a simple strategy."""
 
-    def act(self, observation, env):
+    def act(self, observation):
         action_mask = observation["action_mask"]
         state = observation["human_readable"]
         valid_actions = np.flatnonzero(action_mask)

@@ -28,7 +28,7 @@ class DRLAgent:
                 f"Train a model first by running: python -m rl_example.train"
             )
 
-    def act(self, observation, env):
+    def act(self, observation):
         features = extract_features(observation)
         action_mask = observation["action_mask"]
         action, _ = self.model.predict(

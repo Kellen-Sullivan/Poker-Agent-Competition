@@ -112,5 +112,5 @@ class PokerGymEnv(gym.Env):
                 features = extract_features(observation)
                 return features, our_reward, False
             else:
-                opp_action = self._opponent.act(observation, self._env)
+                opp_action = self._opponent.act(observation)
                 self._env.step(int(opp_action))

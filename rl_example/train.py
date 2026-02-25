@@ -41,7 +41,7 @@ class SelfPlayAgent:
         model.save(tmp_path)
         self.model = MaskablePPO.load(tmp_path)
 
-    def act(self, observation, env):
+    def act(self, observation):
         if self.model is None:
             mask = observation["action_mask"]
             valid = np.flatnonzero(mask)
@@ -108,7 +108,7 @@ def evaluate(model, opponent, num_hands=1000):
                 )
                 action = int(a)
             else:
-                action = int(opponent.act(obs, env))
+                action = int(opponent.act(obs))
 
             env.step(action)
 

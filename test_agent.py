@@ -12,23 +12,26 @@ from agent import MyAgent
 
 def run_competition(num_hands, agent_a, agent_b, seed=None):
     """Simulate *num_hands* of heads-up poker and print results."""
+    label_a = type(agent_a).__name__
+    label_b = type(agent_b).__name__
+
     env = TexasHoldEm(num_players=2, render_mode="ansi", seed=seed)
     env.reset()
 
-    total_rewards = {"Agent_A": 0.0, "Agent_B": 0.0}
-    wins = {"Agent_A": 0, "Agent_B": 0}
+    total_rewards = {label_a: 0.0, label_b: 0.0}
+    wins = {label_a: 0, label_b: 0}
 
     for i in range(num_hands):
         env.reset()
 
         if i % 2 == 0:
             seat_map = {"player_0": agent_a, "player_1": agent_b}
-            agent_identity = {"player_0": "Agent_A", "player_1": "Agent_B"}
+            agent_identity = {"player_0": label_a, "player_1": label_b}
         else:
             seat_map = {"player_0": agent_b, "player_1": agent_a}
-            agent_identity = {"player_0": "Agent_B", "player_1": "Agent_A"}
+            agent_identity = {"player_0": label_b, "player_1": label_a}
 
-        hand_rewards = {"Agent_A": 0.0, "Agent_B": 0.0}
+        hand_rewards = {label_a: 0.0, label_b: 0.0}
 
         for agent in env.agent_iter:
             observation, reward, termination, truncation, info = env.last()
@@ -38,7 +41,7 @@ def run_competition(num_hands, agent_a, agent_b, seed=None):
             if termination or truncation:
                 action = None
             else:
-                action = seat_map[agent].act(observation, env)
+                action = seat_map[agent].act(observation)
 
             env.step(action)
 
@@ -53,17 +56,18 @@ def run_competition(num_hands, agent_a, agent_b, seed=None):
     env.close()
 
     BIG_BLIND = 2
+    max_len = max(len(n) for n in total_rewards)
     print("\n=== Final Results ===")
     print(f"Total Hands: {num_hands}")
     for name in total_rewards:
         avg_bb = total_rewards[name] / (num_hands * BIG_BLIND)
         win_rate = (wins[name] / num_hands) * 100
+        padded = name.ljust(max_len)
         print(
-            f"  {name}: {total_rewards[name]:+.1f} chips | "
-            f"{avg_bb * 100:+.2f} bb/100 | Win rate: {win_rate:.1f}%"
+            f"  {padded}  {total_rewards[name]:>+10.1f} chips | "
+            f"{avg_bb * 100:>+8.2f} bb/100 | Win rate: {win_rate:5.1f}%"
         )
 
 
 if __name__ == "__main__":
-    print("MyAgent vs HeuristicAgent (10 000 hands)\n")
     run_competition(10_000, MyAgent(), HeuristicAgent())
