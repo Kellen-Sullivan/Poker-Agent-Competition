@@ -10,7 +10,7 @@ See `instructions.ipynb` for full competition details.
 pip install -r requirements.txt
 ```
 
-1. Edit `agent.py` — implement your strategy in `MyAgent.act()`. If you are implementing a deep reinforcement learning agent, you may want to create additional files. See `rl_example` for more details.
+1. Edit `agent.py` — implement your strategy in `MyAgent.act()`. If you are implementing a deep reinforcement learning agent, you may want to create additional files. See `instructions.ipynb` and the `rl_example` directory for more details.
 2. Run `python test_agent.py` to benchmark against built-in opponents.
 
 ## Files
